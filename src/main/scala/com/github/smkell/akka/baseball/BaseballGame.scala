@@ -4,6 +4,9 @@ import akka.actor.FSM
 import com.github.smkell.akka.baseball.BaseballGame._
 import com.github.smkell.akka.baseball.BaseballGameProtocol._
 
+/** Companion object for the BaseballGame class.
+  *
+  */
 object BaseballGame {
 
   sealed trait GameState
@@ -14,31 +17,33 @@ object BaseballGame {
 
 }
 
+/** Protocol defining the public interface of the BaseballGame actor.
+  *
+  */
 object BaseballGameProtocol {
 
   sealed trait Side
-
-  case class Count(balls: Int, strikes: Int)
-
-  case class Inning(inning: Int, side: Side)
-
-  case class Score(awayScore: Int, homeScore: Int)
-
   case object Top extends Side
-
   case object Bottom extends Side
 
+  sealed trait PitchType
+  case object Ball extends PitchType
+  case object Strike extends PitchType
+
+  case class Count(balls: Int, strikes: Int)
+  case class Inning(inning: Int, side: Side)
+  case class Score(awayScore: Int, homeScore: Int)
+
+  // Events
   case object GetCount
-
   case object GetInning
-
   case object GetOuts
-
   case object GetScore
 
+  case class ThrowPitch(pitch: PitchType)
 }
 
-/**
+/** FSM for simulating a baseball game.
   * Created by Sean on 6/3/2016.
   */
 class BaseballGame extends FSM[GameState, GameData] {
@@ -53,7 +58,9 @@ class BaseballGame extends FSM[GameState, GameData] {
   )
 
   when(NoRunners) {
-    case Event(GetCount, _) => sender ! stateData.currentCount; stay()
+    case Event(ThrowPitch(Strike), GameData(Count(balls, strikes), _, _, _)) => {
+      stay() using stateData.copy(currentCount = Count(balls = balls, strikes= strikes + 1))
+    }
   }
 
   whenUnhandled {

@@ -42,5 +42,17 @@ class BaseballGameSpec extends TestKit(ActorSystem("baseball-system")) with Must
       game ! SubscribeTransitionCallBack(testActor)
       expectMsg(CurrentState(game, NoRunners))
     }
+
+    describe("when a strike is thrown") {
+      val game = TestActorRef(Props(new BaseballGame()))
+      game ! ThrowPitch(Strike)
+
+      describe("the count") {
+        it("should be 0-1") {
+          game ! GetCount
+          expectMsg(Count(balls = 0, strikes = 1))
+        }
+      }
+    }
   }
 }
