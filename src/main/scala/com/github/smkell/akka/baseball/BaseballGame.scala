@@ -61,6 +61,12 @@ class BaseballGame extends FSM[GameState, GameData] {
     case Event(ThrowPitch(Strike), GameData(Count(balls, strikes), _, _, _)) => {
       stay() using stateData.copy(currentCount = Count(balls = balls, strikes= strikes + 1))
     }
+    case Event(ThrowPitch(Ball), GameData(Count(balls, strikes), _, _, _)) if balls < 3 => {
+      stay() using stateData.copy(currentCount = Count(balls = balls + 1, strikes = strikes))
+    }
+    case Event(ThrowPitch(Ball), GameData(Count(balls, strikes), _, _, _)) if balls == 3 => {
+      stay() using stateData.copy(currentCount = Count(0, 0))
+    }
   }
 
   whenUnhandled {

@@ -54,5 +54,31 @@ class BaseballGameSpec extends TestKit(ActorSystem("baseball-system")) with Must
         }
       }
     }
+
+    describe("when a ball is thrown") {
+      val game = TestActorRef(Props(new BaseballGame()))
+      game ! ThrowPitch(Ball)
+
+      describe("the count") {
+        it("should be 1-0") {
+          game ! GetCount
+          expectMsg(Count(balls = 1, strikes = 0))
+        }
+      }
+    }
+
+    describe("when four balls are thrown in a row") {
+      val game = TestActorRef(Props(new BaseballGame()))
+      for (i <- 1 to 4) {
+        game ! ThrowPitch(Ball)
+      }
+
+      describe("the count") {
+        it("should be 0-0") {
+          game ! GetCount
+          expectMsg(Count(0, 0))
+        }
+      }
+    }
   }
 }
